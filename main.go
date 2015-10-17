@@ -12,11 +12,11 @@ import (
 	"os/user"
 	"path"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/Luzifer/go-openssl"
 	"github.com/bgentry/speakeasy"
-	"github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/alecthomas/template"
 	"github.com/spf13/cobra"
 )
 
