@@ -1,0 +1,7 @@
+---
+# DateFormat: see formatting at https://golang.org/pkg/time/#Time.Format
+DateFormat: Mon, 2006-01-02
+# EditorCmd: command to use for editing the diary
+EditorCmd: /usr/bin/vim {{ .DiaryFile }}
+# Encrypt: use a password to en/decrypt the stored version of the diary
+Encrypt: false
