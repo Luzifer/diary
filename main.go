@@ -56,6 +56,10 @@ func init() {
 		Use:   "init",
 		Short: "Copies settings.yml and template.md examples into storing directory",
 		Run:   actionInit,
+	}, {
+		Use:   "version",
+		Short: "Displays the current version of the utility",
+		Run:   actionVersion,
 	}}...)
 
 	currentUser, err := user.Current()
@@ -226,4 +230,8 @@ func actionInit(cmd *cobra.Command, args []string) {
 	ioutil.WriteFile(path.Join(p, "diary.md"), []byte{}, 0600)
 
 	log.Printf("Settings file and Template copied to %s", p)
+}
+
+func actionVersion(cmd *cobra.Command, args []string) {
+	fmt.Printf("diary version %s\n", version)
 }
