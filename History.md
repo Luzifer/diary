@@ -1,4 +1,9 @@
 
+0.2.0 / 2015-10-21
+==================
+
+  * Added option to add a new entry when calling the editor
+
 0.1.2 / 2015-10-17
 ==================
 
