@@ -26,6 +26,7 @@ var (
 	set    *settings
 	params = struct {
 		SettingsFile string
+		AddOnEdit    bool
 	}{}
 	tmpFile string
 	tmpPass string
@@ -38,29 +39,46 @@ func init() {
 		Use: "diary",
 	}
 
-	rootCmd.AddCommand([]*cobra.Command{{
-		Use:               "add",
-		Short:             "Creates a new daily entry in the diary",
-		PersistentPreRunE: loadSettings,
-		PreRun:            preDecrypt,
-		Run:               actionAdd,
-		PostRun:           postEncrypt,
-	}, {
-		Use:               "edit",
-		Short:             "Opens the editor with the diary file",
-		PersistentPreRunE: loadSettings,
-		PreRun:            preDecrypt,
-		Run:               actionEdit,
-		PostRun:           postEncrypt,
-	}, {
-		Use:   "init",
-		Short: "Copies settings.yml and template.md examples into storing directory",
-		Run:   actionInit,
-	}, {
-		Use:   "version",
-		Short: "Displays the current version of the utility",
-		Run:   actionVersion,
-	}}...)
+	var (
+		addCmd = &cobra.Command{
+			Use:               "add",
+			Short:             "Creates a new daily entry in the diary",
+			PersistentPreRunE: loadSettings,
+			PreRun:            preDecrypt,
+			Run:               actionAdd,
+			PostRun:           postEncrypt,
+		}
+
+		editCmd = &cobra.Command{
+			Use:               "edit",
+			Short:             "Opens the editor with the diary file",
+			PersistentPreRunE: loadSettings,
+			PreRun:            preDecrypt,
+			Run:               actionEdit,
+			PostRun:           postEncrypt,
+		}
+
+		initCmd = &cobra.Command{
+			Use:   "init",
+			Short: "Copies settings.yml and template.md examples into storing directory",
+			Run:   actionInit,
+		}
+
+		versionCmd = &cobra.Command{
+			Use:   "version",
+			Short: "Displays the current version of the utility",
+			Run:   actionVersion,
+		}
+	)
+
+	editCmd.Flags().BoolVarP(&params.AddOnEdit, "add", "a", false, "Also add the entry for the current day if not present")
+
+	rootCmd.AddCommand(
+		addCmd,
+		editCmd,
+		initCmd,
+		versionCmd,
+	)
 
 	currentUser, err := user.Current()
 	if err != nil {
@@ -146,8 +164,11 @@ func actionAdd(cmd *cobra.Command, args []string) {
 
 	if strings.Contains(string(diary), dateString) {
 		log.Printf("The diary already contains the current date.")
-		os.Remove(tmpFile)
-		os.Exit(1)
+		if cmd.Name() == "add" {
+			os.Remove(tmpFile)
+			os.Exit(1)
+		}
+		return
 	}
 
 	p := path.Dir(params.SettingsFile)
@@ -183,6 +204,10 @@ func actionAdd(cmd *cobra.Command, args []string) {
 }
 
 func actionEdit(cmd *cobra.Command, args []string) {
+	if params.AddOnEdit {
+		actionAdd(cmd, args)
+	}
+
 	tpl, err := template.New("EditCmd").Parse(set.EditorCmd)
 	if err != nil {
 		log.Printf("Unable to read EditorCmd")
